@@ -5,5 +5,5 @@ Prototype af en officiel, personaliseret AI-platform for Undervisningsministerie
 
 ## Udvikling
 
-Prototypen er udviklet med **Claude Code** som primært kodeværktøj. Beslutninger om koncept, design, AI-arkitektur og brugeroplevelse er truffet af mig; den tekniske implementering er sket i samarbejde med Claude Code. Se projektdokumentationen, afsnit 4.1, for en fuld redegørelse.
+Prototypen er udviklet med **Claude Code** som primært kodeværktøj. Beslutninger om koncept, design, AI-arkitektur og brugeroplevelse er truffet af mig; den tekniske implementering er sket i samarbejde med Claude Code.
 
