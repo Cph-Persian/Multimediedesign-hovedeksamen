@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =================================================================
+   Design-rationale (CRAP + Gestalt)
+   =================================================================
+   Denne fil definerer det fælles "visuelle sprog" der anvendes på
+   tværs af platformen. Alle gentagne mønstre er navngivet og samlet
+   her — det er en bevidst implementering af:
+
+     CRAP / Repetition  — ét sted at definere knap-, kort- og
+                          accent-mønstre så de IKKE driver auseinander.
+     CRAP / Alignment   — fælles spacing-skala og container-bredder.
+     CRAP / Contrast    — eksplicit ink/muted/border-hierarki.
+     Gestalt Similarity — alle ai-region-kort har samme radius og
+                          skygge → opfattes som tilhørende samme klasse.
+     Gestalt Common Region — ai-region indrammer relaterede elementer.
+     Gestalt Figure-Ground — body-baggrund (neutral) bærer "figurer"
+                          (white surfaces med shadow-card).
+   ================================================================= */
+
+/* ---------------------------------------------------------------
+   Base — typografi + WCAG focus states
+   --------------------------------------------------------------- */
+@layer base {
+  :root {
+    /* Profil-accent som CSS-variabel — sættes af ThemeProvider på <html>.
+       Repetition i farve: når profilen skifter, opdateres ALLE accent-
+       klasser nedenfor samtidig — det er Gestalt Common Fate i UI'et. */
+    --profile-accent: #3B82F6;       /* default: STX */
+    --profile-accent-soft: #DBEAFE;
+    --profile-accent-ink: #1E3A8A;
+  }
+
+  html, body, #root {
+    height: 100vh;
+    height: 100dvh;          /* dynamic viewport — bedre på mobil med adressebjælke */
+    overflow: hidden;        /* App-feel: kun bestemte regioner må scrolle */
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-uvm-neutral text-uvm-ink;
+  }
+
+  /* Contrast: ALDRIG Inter til overskrifter — Work Sans giver markant
+     anderledes karakter og signalerer "her starter en ny enhed" */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  /* WCAG AA: synligt fokus for tastaturnavigation.
+     Outline i profilens accentfarve = personalisering + WCAG-compliance */
+  :focus-visible {
+    outline: 3px solid var(--profile-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Skip-link til skærmlæsere */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50
+           focus:bg-uvm-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-md;
+  }
+
+  /* Subtil scrollbar — figur-grund-relationen forstyrres ikke af tyk scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(15, 27, 45, 0.18); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(15, 27, 45, 0.32); background-clip: content-box; }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* ---------------------------------------------------------------
+   Components — gentagne mønstre (Repetition + Similarity)
+   --------------------------------------------------------------- */
+@layer components {
+  /* ─── Gestalt Common Region: indrammede klasser ─────────────────
+     Alle informationszoner (chat, infokort, læreplans-blokke) bruger
+     denne klasse. Det signalerer "elementer indenfor hører sammen".
+     Same radius + shadow + border → Gestalt Similarity på tværs af kort. */
+  .ai-region {
+    @apply bg-white border border-uvm-border rounded-xl2 shadow-card;
+  }
+
+  /* Forhøjet variant til kort der "stikker frem" — fx CTAs i hero,
+     modals. Etablerer Figure-Ground med stærkere skygge. */
+  .ai-region-raised {
+    @apply bg-white border border-uvm-border rounded-xl2 shadow-lift;
+  }
+
+  /* ─── Profil-accent system (Repetition) ────────────────────────
+     Fem klasser der ALLE peger på samme CSS-variabel. Når brugeren
+     skifter profil, opdateres alt fem på én gang → Gestalt Common
+     Fate (synkron forandring = samme system). */
+  .accent-bg      { background-color: var(--profile-accent); color: white; }
+  .accent-bg-soft { background-color: var(--profile-accent-soft); color: var(--profile-accent-ink); }
+  .accent-text    { color: var(--profile-accent); }
+  .accent-border  { border-color: var(--profile-accent); }
+  .accent-ring    { box-shadow: 0 0 0 3px var(--profile-accent-soft); }
+
+  /* ─── Knap-system (Similarity + Contrast) ──────────────────────
+     Fælles base sikrer at ALLE knapper deler form/spacing/font.
+     Variant-klasser (-primary, -accent, -ghost, -cta) skaber Contrast
+     mellem handlinger på forskellig vigtigheds-niveau. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+           font-medium text-sm transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed
+           active:scale-[0.98];
+    /* active:scale-[0.98] — Gestalt Common Fate: knappen "trykkes ned"
+       under fingeren → fysisk respons forstærker handlings-feedback */
+  }
+
+  .btn-primary {
+    @apply btn bg-uvm-primary text-white shadow-card hover:shadow-lift hover:bg-[#003a7a];
+  }
+
+  .btn-accent {
+    @apply btn text-white shadow-card hover:shadow-lift;
+    background-color: var(--profile-accent);
+  }
+  .btn-accent:hover { filter: brightness(0.95); }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-uvm-ink hover:bg-uvm-neutral;
+  }
+
+  /* Kritisk action — Contrast: rødt er reserveret KUN til irreversible
+     handlinger (slet, log ud-bekræftelse). Almindelige CTA'er må ALDRIG
+     være røde — ellers udvandes signalværdien (Contrast-loven). */
+  .btn-cta {
+    @apply btn bg-uvm-cta text-white shadow-card hover:bg-[#c11820];
+  }
+
+  /* ─── Layout-hjælpere (Alignment) ──────────────────────────────
+     Standard-bredde for content-sider. Holder linje-længden læsbar
+     og giver en konstant venstre-kant øjet kan følge ned ad
+     (Gestalt Continuation). */
+  .content-frame {
+    @apply max-w-4xl w-full mx-auto;
+  }
+}
